@@ -1,12 +1,14 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import Wheat from './pages/Wheat';
 import Jowar from './pages/Jowar';
 import Bajra from './pages/Bajra';
 
 // Component for handling voice input and navigation
 function VoiceButton() {
-  const navigate = useNavigate(); // useNavigate hook is used for navigation
+  const navigate = useNavigate();
+  const [generatedText, setGeneratedText] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
 
   // Function to handle voice input
   async function handleVoiceInput() {
@@ -29,8 +31,12 @@ function VoiceButton() {
 
       if (data.page) {
         navigate(`/${data.page}`);
+      } else if (data.text && data.audio_url) {
+        // Update state to display the generated text and audio
+        setGeneratedText(data.text);
+        setAudioUrl(data.audio_url);
       } else {
-        console.error('No page returned from server.');
+        console.error('No page or text returned from server.');
       }
     } catch (error) {
       console.error('Error handling voice input:', error);
@@ -49,8 +55,8 @@ function VoiceButton() {
 
     mediaRecorder.start();
 
-    // Record for 3 seconds
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Record for 10 seconds
+    await new Promise(resolve => setTimeout(resolve, 10000));
     mediaRecorder.stop();
 
     // Wait until recording is stopped
@@ -64,12 +70,29 @@ function VoiceButton() {
   }
 
   return (
-    <button
-      className="bg-blue-500 text-white p-2 rounded m-4"
-      onClick={handleVoiceInput}
-    >
-      Start Voice Command
-    </button>
+    <div>
+      <button
+        className="bg-blue-500 text-white p-2 rounded m-4"
+        onClick={handleVoiceInput}
+      >
+        Start Voice Command
+      </button>
+      {generatedText && (
+        <div className="p-4">
+          <h2 className="text-xl font-semibold">Generated Text:</h2>
+          <p>{generatedText}</p>
+          {audioUrl && (
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold">Generated Audio:</h2>
+              <audio controls>
+                <source src={audioUrl} type="audio/mp3" />
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

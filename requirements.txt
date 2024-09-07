@@ -3,3 +3,6 @@ flask-CORS
 SpeechRecognition
 googletrans
 pydub
+dotenv
+gtts
+google-generativeai
